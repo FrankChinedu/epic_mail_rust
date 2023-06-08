@@ -5,6 +5,6 @@ use rocket::{http::Status, serde::json::Json};
 pub fn general_not_found() -> Result<Json<GenericResponse>, Status> {
     Ok(Json(GenericResponse {
         message: "Route not Found".to_string(),
-        status: "failure".to_owned(),
+        status: ResponseMessage::Failure,
     }))
 }
