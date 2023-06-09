@@ -4,25 +4,32 @@ use dotenv::dotenv;
 #[macro_use]
 extern crate rocket;
 
+use crate::app::{rocket, RocketConfig};
+use crate::model::AppDatabase;
+
+mod app;
 mod model;
 mod response;
 mod routes;
 
-use crate::response::catchers::general_not_found;
-use crate::routes::{health_checker_handler, welcome};
-
-#[launch]
-fn rocket() -> _ {
+fn main() {
     dotenv().ok();
-    let database_url = match env::var("DATABASE_URL") {
+    let connection_str = match env::var("DATABASE_URL") {
         Ok(n) => n,
-        Err(e) => panic!("database_url is required {}", e),
+        Err(e) => panic!("connection string required{}", e),
     };
 
-    println!("database_url {:?}", database_url);
+    let rt = tokio::runtime::Runtime::new().expect("failed to spawn tokio runtime");
+    // let handle = rt.handle().clone();
 
-    rocket::build()
-        .mount("/", routes![welcome])
-        .mount("/api", routes![health_checker_handler])
-        .register("/", catchers![general_not_found])
+    let database = rt.block_on(async move { AppDatabase::new(&connection_str).await });
+
+    let config = RocketConfig { database };
+
+    rt.block_on(async move {
+        rocket(config)
+            .launch()
+            .await
+            .expect("failed to launch rocket server");
+    })
 }

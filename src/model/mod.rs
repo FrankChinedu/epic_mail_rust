@@ -1,16 +1,26 @@
+use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use sqlx::Postgres;
+use std::sync::Arc;
+
+#[derive(Debug, thiserror::Error)]
+pub enum DataError {
+    #[error("database error: {0}")]
+    Database(#[from] sqlx::Error),
+}
 
 pub type AppDatabase = Database<Postgres>;
 pub type DatabasePool = sqlx::postgres::PgPool;
 pub type Transaction<'t> = sqlx::Transaction<'t, Postgres>;
-pub type AppDatabaseRow = sqlx::postgres::PgQueryResult;
+pub type AppDatabaseRow = sqlx::postgres::PgRow;
+pub type AppQueryResult = sqlx::postgres::PgQueryResult;
 
 pub struct Database<D: sqlx::Database>(sqlx::Pool<D>);
 
 impl Database<Postgres> {
     pub async fn new(connection_str: &str) -> Self {
         let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(5)
             .connect(connection_str)
             .await;
 
