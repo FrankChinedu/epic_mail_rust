@@ -15,6 +15,7 @@ pub type Transaction<'t> = sqlx::Transaction<'t, Postgres>;
 pub type AppDatabaseRow = sqlx::postgres::PgRow;
 pub type AppQueryResult = sqlx::postgres::PgQueryResult;
 
+#[derive(Debug, Clone)]
 pub struct Database<D: sqlx::Database>(sqlx::Pool<D>);
 
 impl Database<Postgres> {
@@ -34,6 +35,14 @@ impl Database<Postgres> {
                 panic!("database connection error");
             }
         }
+    }
+    pub async fn run_migration(&self) {
+        println!("running migration");
+        let pool = self.get_pool();
+        match sqlx::migrate!().run(pool).await {
+            Ok(_) => println!("migration sucessful"),
+            Err(_) => eprintln!("Migration Failed"),
+        };
     }
 
     pub fn get_pool(&self) -> &DatabasePool {

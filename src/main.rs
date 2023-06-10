@@ -22,7 +22,11 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().expect("failed to spawn tokio runtime");
     // let handle = rt.handle().clone();
 
-    let database = rt.block_on(async move { AppDatabase::new(&connection_str).await });
+    let database = rt.block_on(async move {
+        let db = AppDatabase::new(&connection_str).await;
+        db.run_migration().await;
+        db
+    });
 
     let config = RocketConfig { database };
 
