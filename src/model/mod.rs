@@ -11,6 +11,8 @@ pub enum DataError {
     Database(#[from] sqlx::Error),
 }
 
+pub type DbResult<T> = std::result::Result<T, DataError>;
+
 pub type AppDatabase = Database<Postgres>;
 pub type DatabasePool = sqlx::postgres::PgPool;
 pub type Transaction<'t> = sqlx::Transaction<'t, Postgres>;
