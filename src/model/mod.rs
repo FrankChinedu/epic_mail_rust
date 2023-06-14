@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::Postgres;
 use std::sync::Arc;
 
+mod user;
+
 #[derive(Debug, thiserror::Error)]
 pub enum DataError {
     #[error("database error: {0}")]

@@ -1,3 +1,5 @@
+pub mod users;
+
 use crate::response::{GenericResponse, ResponseMessage};
 use rocket::{get, http::Status, serde::json::Json};
 

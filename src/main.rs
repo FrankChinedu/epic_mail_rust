@@ -11,6 +11,7 @@ mod app;
 mod model;
 mod response;
 mod routes;
+mod service;
 
 fn main() {
     dotenv().ok();
